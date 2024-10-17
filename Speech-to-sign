@@ -1,0 +1,115 @@
+import speech_recognition as sr
+from PIL import Image, ImageTk
+import tkinter as tk
+import os
+
+# Define a mapping from recognized phrases to GIF paths
+phrase_gifs = {
+    'thank you': 'C:/Users/DELL/Videos/Captures/thank-you-thx.gif',
+    'applause': 'C:/Users/DELL/Videos/Captures/applause-deaf.gif',
+    'happy': 'C:/Users/DELL/Videos/Captures/happy-deaf.gif',
+    'how are you': 'C:/Users/DELL/Videos/Captures/how-are-you-deaf.gif',
+    'please': 'C:/Users/DELL/Videos/Captures/please-simax.gif',
+    'sorry': 'C:/Users/DELL/Videos/Captures/sorry-sign.gif',
+    'wonderful': 'C:/Users/DELL/Videos/Captures/wonderful-simax.gif',
+    'honest': 'C:/Users/DELL/Videos/Captures/honest.gif',
+    'average': 'C:/Users/DELL/Videos/Captures/average.gif',
+    'clinic': 'C:/Users/DELL/Videos/Captures/clinic.gif',
+    'database': 'C:/Users/DELL/Videos/Captures/database.gif',
+    'deaf': 'C:/Users/DELL/Videos/Captures/deaf.gif',
+    'delegate': 'C:/Users/DELL/Videos/Captures/delegate.gif',
+    'dialogue': 'C:/Users/DELL/Videos/Captures/dialogue.gif',
+    'discipline': 'C:/Users/DELL/Videos/Captures/discipline.gif',
+    'discrimination': 'C:/Users/DELL/Videos/Captures/discrimination.gif',
+    'distance': 'C:/Users/DELL/Videos/Captures/distance.gif',
+    'efficiency': 'C:/Users/DELL/Videos/Captures/efficiency.gif',
+    'ethic': 'C:/Users/DELL/Videos/Captures/ethic.gif',
+    'experiment': 'C:/Users/DELL/Videos/Captures/experiment.gif',
+    'expert': 'C:/Users/DELL/Videos/Captures/expert.gif',
+    'explosion': 'C:/Users/DELL/Videos/Captures/explosion.gif',
+    'export': 'C:/Users/DELL/Videos/Captures/export.gif',
+    'flag': 'C:/Users/DELL/Videos/Captures/flag.gif',
+    'harvest': 'C:/Users/DELL/Videos/Captures/harvest.gif',
+    'i love you': 'C:/Users/DELL/Videos/Captures/ily-i-love-you.gif',
+    'infection': 'C:/Users/DELL/Videos/Captures/infection.gif',
+    'memorial': 'C:/Users/DELL/Videos/Captures/memorial.gif',
+    'mistake': 'C:/Users/DELL/Videos/Captures/mistake.gif',
+    'nice to meet you': 'C:/Users/DELL/Videos/Captures/nice-to-meet-you-deaf.gif',
+    'produce': 'C:/Users/DELL/Videos/Captures/produce.gif',
+    'screenplay': 'C:/Users/DELL/Videos/Captures/screenplay.gif',
+    'sick': 'C:/Users/DELL/Videos/Captures/sick.gif',
+    'stomach pain': 'C:/Users/DELL/Videos/Captures/stomachpain.gif',
+    'village': 'C:/Users/DELL/Videos/Captures/village.gif',
+    'physician': 'C:/Users/DELL/Videos/Captures/physician.gif',
+    'keep calm and stay home': 'C:/Users/DELL/Videos/Captures/simax-sign-time.gif'
+    # Update with your actual path
+}
+
+
+def recognize_speech():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Adjusting for ambient noise... Please wait.")
+        recognizer.adjust_for_ambient_noise(source)
+        print("Listening for speech...")
+
+        try:
+            audio = recognizer.listen(source)
+            print("Recognizing...")
+            text = recognizer.recognize_google(audio).lower()
+            return text
+        except sr.UnknownValueError:
+            print("Google Web Speech API could not understand the audio.")
+            return None
+        except sr.RequestError as e:
+            print(f"Could not request results from Google Web Speech API; {e}")
+            return None
+
+
+def play_gif(gif_path):
+    # Create a tkinter window
+    root = tk.Tk()
+    root.title("Phrase GIF")
+
+    # Load the GIF using Pillow
+    gif = Image.open(gif_path)
+
+    # Create a label to display the GIF
+    label = tk.Label(root)
+    label.pack()
+
+    # Function to update the label with the next frame of the GIF
+    def update_frame(frame_num):
+        gif.seek(frame_num)
+        frame_image = ImageTk.PhotoImage(gif)
+        label.config(image=frame_image)
+        label.image = frame_image
+        next_frame = (frame_num + 1) % gif.n_frames
+        root.after(200, update_frame, next_frame)
+
+    # Start playing the GIF
+    update_frame(0)
+
+    # Start the Tkinter event loop
+    root.mainloop()
+
+
+def main():
+    try:
+        while True:
+            recognized_text = recognize_speech()
+
+            if recognized_text:
+                if recognized_text in phrase_gifs:
+                    print(f"Recognized phrase: {recognized_text.capitalize()}")
+                    play_gif(phrase_gifs[recognized_text])
+                else:
+                    print("Phrase not recognized. Please say 'How are you' or 'Thank you'.")
+            else:
+                print("No text recognized. Try again.")
+    except KeyboardInterrupt:
+        print("Exiting...")
+
+
+if __name__ == "__main__":
+    main()
